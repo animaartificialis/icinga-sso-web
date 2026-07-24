@@ -12,6 +12,7 @@ use Icinga\Security\SecurityException;
 use Icinga\User;
 use Icinga\Util\Json;
 use Icinga\Web\Session;
+use Icinga\Web\Url;
 use ipl\Web\Compat\CompatController;
 
 class OidcController extends CompatController
@@ -115,6 +116,15 @@ class OidcController extends CompatController
         $this->Auth()->setAuthenticated($user);
         $session->delete('login');
         AuthenticationHook::triggerLogin($user);
-        $this->redirectNow('dashboard');
+
+        $redirect = $login->redirect ?? null;
+
+        if ($redirect !== null && $redirect !== '' && ! Url::fromPath($redirect)->isExternal()) {
+            // Deep link the user originally requested (e.g. from a notification
+            // email) before being sent to the login page.
+            $this->redirectNow(Url::fromPath($redirect));
+        } else {
+            $this->redirectNow('dashboard');
+        }
     }
 }
