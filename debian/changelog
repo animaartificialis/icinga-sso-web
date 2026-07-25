@@ -1,0 +1,10 @@
+icinga-sso-web (1:1.0.0+imatic1) icinga; urgency=medium
+
+  * Unofficial patched rebuild of icinga-sso-web 1.0.0.
+  * Add post-login OIDC redirect fix (icinga-sso-web PR #13): after SSO sign-in
+    redirect to the originally requested URL instead of always the dashboard;
+    external URLs rejected via Url::fromPath()->isExternal().
+  * Epoch bump (1:) so this drop-in supersedes the official 1.0.0 package and
+    its nightly snapshots on upgrade.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Sat, 25 Jul 2026 08:57:56 +0000

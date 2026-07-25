@@ -1,0 +1,25 @@
+Source: icinga-sso-web
+Maintainer: Anima Artificialis <anima.artificialis@gmail.com>
+Section: admin
+Priority: optional
+Build-Depends:
+ debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Homepage: https://github.com/animaartificialis/icinga-sso-web
+
+Package: icinga-sso-web
+Architecture: all
+Depends:
+ icinga-php-library (>= 0.19.2),
+ icinga-php-thirdparty (>= 0.15.3),
+ icingaweb2 (>= 2.13.0),
+ ${misc:Depends}
+Description: Icinga Web SSO (patched build with OIDC redirect fix)
+ Icinga Web SSO places a "Login with PROVIDER" button on the login page for
+ each configured provider. Users are authenticated against the chosen provider
+ and logged in to Icinga Web.
+ .
+ This is an unofficial drop-in rebuild of the upstream 1.0.0 package that adds
+ the post-login redirect fix: after OIDC sign-in the user lands on the
+ originally requested deep link instead of always the dashboard (external URLs
+ rejected via the same check core LoginForm uses).

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+shortname=sso
+
+case "$1" in
+    remove)
+        rm -f /etc/icingaweb2/enabledModules/$shortname
+    ;;
+
+    upgrade|deconfigure)
+    ;;
+
+    failed-upgrade)
+    ;;
+
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0
