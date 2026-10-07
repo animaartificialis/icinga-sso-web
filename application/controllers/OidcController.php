@@ -11,8 +11,8 @@ use Icinga\Exception\AuthenticationException;
 use Icinga\Security\SecurityException;
 use Icinga\User;
 use Icinga\Util\Json;
+use Icinga\Web\Form\Element\LoginRedirect;
 use Icinga\Web\Session;
-use Icinga\Web\Url;
 use ipl\Web\Compat\CompatController;
 
 class OidcController extends CompatController
@@ -117,14 +117,14 @@ class OidcController extends CompatController
         $session->delete('login');
         AuthenticationHook::triggerLogin($user);
 
-        $redirect = $login->redirect ?? null;
+        // Deep link the user originally requested (e.g. from a notification
+        // email) before being sent to the login page. The core LoginRedirect
+        // element validates it the same way the password login does: falls back
+        // to LoginForm::REDIRECT_URL when empty or pointing at the logout
+        // action, and rejects external URLs.
+        $redirect = new LoginRedirect('redirect');
+        $redirect->setValue($login->redirect ?? null);
 
-        if ($redirect !== null && $redirect !== '' && ! Url::fromPath($redirect)->isExternal()) {
-            // Deep link the user originally requested (e.g. from a notification
-            // email) before being sent to the login page.
-            $this->redirectNow(Url::fromPath($redirect));
-        } else {
-            $this->redirectNow('dashboard');
-        }
+        $this->redirectNow($redirect->getUrl());
     }
 }
