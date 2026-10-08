@@ -1,3 +1,15 @@
+icinga-sso-web (1:1.0.0+imatic6) icinga; urgency=medium
+
+  * Return a proper 400 for an external post-login redirect, as Icinga Web's
+    own AuthenticationController does, instead of the silent dashboard
+    fallback added in +imatic5. The fallback was only needed because the error
+    page could not render: Auth::setAuthenticated() does not set the user on
+    the request, so AutoRefreshForm hit a null user. Set the user on the
+    request too — mirroring EmbeddedWeb::setupUser() — and let LoginRedirect
+    reject the URL as core intends.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Thu, 08 Oct 2026 16:39:50 +0000
+
 icinga-sso-web (1:1.0.0+imatic5) icinga; urgency=medium
 
   * Do not let LoginRedirect's HttpBadRequestException escape the OIDC

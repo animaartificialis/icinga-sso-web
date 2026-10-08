@@ -12,8 +12,8 @@ to clone and build the module yourself. Not affiliated with Icinga GmbH.
 
 **Fix:** after SSO sign-in the user is redirected to the originally requested URL
 (e.g. a deep link from a notification e-mail) instead of always landing on the
-dashboard. External URLs are rejected via the same `Url::fromPath()->isExternal()`
-check core `LoginForm` uses. Proposed upstream as
+dashboard. External URLs are rejected with a 400, via Icinga Web's own
+`LoginRedirect` element — the same validation the password login uses. Proposed upstream as
 [PR #13](https://github.com/Icinga/icinga-sso-web/pull/13).
 
 ### Install the prebuilt `.deb`
