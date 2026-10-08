@@ -12,7 +12,7 @@ Architecture: all
 Depends:
  icinga-php-library (>= 0.19.2),
  icinga-php-thirdparty (>= 0.15.3),
- icingaweb2 (>= 2.13.0),
+ icingaweb2 (>= 2.14.0),
  ${misc:Depends}
 Description: Icinga Web SSO (patched build with OIDC redirect fix)
  Icinga Web SSO places a "Login with PROVIDER" button on the login page for

@@ -1,3 +1,12 @@
+icinga-sso-web (1:1.0.0+imatic3) icinga; urgency=medium
+
+  * Require icingaweb2 (>= 2.14.0). The LoginRedirect element introduced in
+    +imatic2 only exists from Icinga Web 2.14.0; the inherited (>= 2.13.0)
+    dependency let the package install on 2.13.x, where the SSO callback then
+    died on a missing class after a successful authentication.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Thu, 08 Oct 2026 12:36:09 +0000
+
 icinga-sso-web (1:1.0.0+imatic2) icinga; urgency=medium
 
   * Use Icinga Web's core LoginRedirect element for the post-login redirect
