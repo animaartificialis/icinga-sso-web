@@ -1,3 +1,13 @@
+icinga-sso-web (1:1.0.0+imatic4) icinga; urgency=medium
+
+  * Rebase onto upstream main (abff75c), picking up "Keep the refresh token if
+    the IdP doesn't rotate it" (#18) — relevant for providers that omit the
+    refresh token on reauth, as RFC 6749 section 6 permits.
+  * Document the raised requirement: Icinga Web >= 2.14, matching the
+    dependency bump from +imatic3.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Thu, 08 Oct 2026 12:43:34 +0000
+
 icinga-sso-web (1:1.0.0+imatic3) icinga; urgency=medium
 
   * Require icingaweb2 (>= 2.14.0). The LoginRedirect element introduced in
