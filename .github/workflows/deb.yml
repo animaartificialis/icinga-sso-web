@@ -27,18 +27,30 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential debhelper devscripts fakeroot
 
+      - name: Read the package version
+        id: ver
+        run: |
+          # Single source of truth: debian/changelog. Everything downstream
+          # derives from it, so bumping the changelog is all a release needs.
+          full="$(dpkg-parsechangelog -S Version)"
+          clean="${full#*:}"
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "clean=$clean" >> "$GITHUB_OUTPUT"
+          echo "Building $full (asset version $clean)"
+
       - name: Build the .deb
         run: |
           dpkg-buildpackage -us -uc -b
           mkdir -p out
           # The on-disk filename escapes the epoch colon as %3a; hand the
-          # release a clean, human-friendly asset name (version inside the
-          # package stays 1:1.0.0+imatic1).
-          cp ../icinga-sso-web_*_all.deb out/icinga-sso-web_1.0.0+imatic1_all.deb
+          # release a clean, human-friendly asset name (the version inside the
+          # package keeps its epoch).
+          cp ../icinga-sso-web_*_all.deb "out/icinga-sso-web_${{ steps.ver.outputs.clean }}_all.deb"
           echo "=== package metadata ==="
-          dpkg-deb -I out/icinga-sso-web_1.0.0+imatic1_all.deb
+          dpkg-deb -I out/*.deb
           echo "=== package contents ==="
-          dpkg-deb -c out/icinga-sso-web_1.0.0+imatic1_all.deb
+          dpkg-deb -c out/*.deb
+          sha256sum out/*.deb
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
@@ -51,8 +63,25 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="deb-v1.0.0+imatic1"
+          CLEAN="${{ steps.ver.outputs.clean }}"
+          FULL="${{ steps.ver.outputs.full }}"
+          TAG="deb-v${CLEAN}"
+          ASSET="icinga-sso-web_${CLEAN}_all.deb"
+          SHA="$(sha256sum "out/${ASSET}" | cut -d' ' -f1)"
+          # Notes via a file: keeps this YAML block clean and lets the sha256
+          # be pinned by a deployment without downloading the asset first.
+          {
+            printf '%s\n\n' "Drop-in Debian package of icinga-sso-web with the post-login OIDC redirect fix (PR #13)."
+            printf '%s\n' "- Package: \`icinga-sso-web\`, version \`${FULL}\`, Architecture \`all\`"
+            printf '%s\n' "- Supersedes the official 1.0.0 (and nightly snapshots) via an epoch bump, so it installs as an upgrade in place."
+            printf '%s\n\n' "- sha256: \`${SHA}\`"
+            printf '%s\n' "Install:"
+            printf '%s\n' '```'
+            printf '%s\n' "sudo apt install ./${ASSET}"
+            printf '%s\n' '```'
+            printf '\n%s\n' "Unofficial rebuild — not affiliated with Icinga GmbH."
+          } > /tmp/relnotes.md
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           gh release create "$TAG" out/*.deb \
-            --title "icinga-sso-web 1.0.0 + OIDC redirect fix — Debian package" \
-            --notes $'Drop-in Debian package of icinga-sso-web with the post-login OIDC redirect fix (PR #13).\n\n- Package: `icinga-sso-web`, version `1:1.0.0+imatic1`, Architecture `all`\n- Supersedes the official 1.0.0 (and nightly snapshots) via an epoch bump, so it installs as an upgrade in place.\n\nInstall:\n```\nsudo apt install ./icinga-sso-web_1.0.0+imatic1_all.deb\n# or\nsudo dpkg -i icinga-sso-web_1.0.0+imatic1_all.deb\n```\n\nUnofficial rebuild — not affiliated with Icinga GmbH.'
+            --title "icinga-sso-web ${CLEAN} — Debian package" \
+            --notes-file /tmp/relnotes.md

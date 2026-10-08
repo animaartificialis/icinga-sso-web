@@ -1,3 +1,14 @@
+icinga-sso-web (1:1.0.0+imatic2) icinga; urgency=medium
+
+  * Use Icinga Web's core LoginRedirect element for the post-login redirect
+    (follow-up to upstream review on PR #13). Adds the fallback to
+    LoginForm::REDIRECT_URL and the guard against redirecting back to
+    authentication/logout.
+  * Behaviour change: an external redirect URL now raises HttpBadRequestException
+    instead of silently falling back to the dashboard, matching the core login.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Thu, 08 Oct 2026 12:22:50 +0000
+
 icinga-sso-web (1:1.0.0+imatic1) icinga; urgency=medium
 
   * Unofficial patched rebuild of icinga-sso-web 1.0.0.
