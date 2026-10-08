@@ -7,12 +7,15 @@ namespace Icinga\Module\Sso\Controllers;
 
 use GuzzleHttp\Client;
 use Icinga\Application\Hook\AuthenticationHook;
+use Icinga\Application\Logger;
 use Icinga\Exception\AuthenticationException;
+use Icinga\Exception\Http\HttpBadRequestException;
 use Icinga\Security\SecurityException;
 use Icinga\User;
 use Icinga\Util\Json;
 use Icinga\Web\Form\Element\LoginRedirect;
 use Icinga\Web\Session;
+use Icinga\Web\Url;
 use ipl\Web\Compat\CompatController;
 
 class OidcController extends CompatController
@@ -125,6 +128,23 @@ class OidcController extends CompatController
         $redirect = new LoginRedirect('redirect');
         $redirect->setValue($login->redirect ?? null);
 
-        $this->redirectNow($redirect->getUrl());
+        try {
+            $url = $redirect->getUrl();
+        } catch (HttpBadRequestException $e) {
+            // Do not let this bubble up. The user is authenticated by now, but
+            // Auth::setAuthenticated() does not put the user on the request, so
+            // rendering the error page fails in turn (AutoRefreshForm calls
+            // getRequest()->getUser()->getPreferences() on null) and the browser
+            // gets a fatal instead of a 400. Dropping the redirect is both safer
+            // and friendlier: the external target is refused either way.
+            Logger::warning(
+                'Refusing external post-login redirect %s: %s',
+                $login->redirect ?? '',
+                $e->getMessage()
+            );
+            $url = Url::fromPath('dashboard');
+        }
+
+        $this->redirectNow($url);
     }
 }

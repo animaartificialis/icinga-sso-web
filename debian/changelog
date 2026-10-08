@@ -1,3 +1,14 @@
+icinga-sso-web (1:1.0.0+imatic5) icinga; urgency=medium
+
+  * Do not let LoginRedirect's HttpBadRequestException escape the OIDC
+    callback. The user is authenticated by that point, but setAuthenticated()
+    does not put the user on the request, so Icinga's error page itself fatals
+    in AutoRefreshForm (getRequest()->getUser() is null) and the browser gets
+    an uncaught Error instead of a 400. Catch it, log the refused target, and
+    fall back to the dashboard — the external redirect is refused either way.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Thu, 08 Oct 2026 16:15:04 +0000
+
 icinga-sso-web (1:1.0.0+imatic4) icinga; urgency=medium
 
   * Rebase onto upstream main (abff75c), picking up "Keep the refresh token if
