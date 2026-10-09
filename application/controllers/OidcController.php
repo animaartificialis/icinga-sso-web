@@ -31,9 +31,7 @@ class OidcController extends CompatController
             throw new SecurityException($this->translate('Invalid or expired state'));
         }
 
-        // Where the user was headed before the login page. Validated up front so a
-        // rejected target does not cost a token exchange, and so the error page is
-        // rendered for an anonymous user.
+        // Resolved up front, so a rejected target costs no token exchange.
         $redirectUrl = (new LoginRedirect('redirect'))->setValue($login->redirect ?? null)->getUrl();
 
         $client = new Client();
