@@ -31,6 +31,11 @@ class OidcController extends CompatController
             throw new SecurityException($this->translate('Invalid or expired state'));
         }
 
+        // Where the user was headed before the login page. Validated up front so a
+        // rejected target does not cost a token exchange, and so the error page is
+        // rendered for an anonymous user.
+        $redirectUrl = (new LoginRedirect('redirect'))->setValue($login->redirect ?? null)->getUrl();
+
         $client = new Client();
 
         $tokens = Json::decode($client->post($login->discovered->token_endpoint, ['form_params' => [
@@ -114,20 +119,8 @@ class OidcController extends CompatController
         $user = (new User($username))->setGroups($groups ?? []);
 
         $this->Auth()->setAuthenticated($user);
-        // Auth::setAuthenticated() does not set the user on the request, which the error
-        // page (AutoRefreshForm) needs should LoginRedirect::getUrl() reject the redirect.
-        $this->getRequest()->setUser($user);
         $session->delete('login');
         AuthenticationHook::triggerLogin($user);
-
-        // Deep link the user originally requested (e.g. from a notification
-        // email) before being sent to the login page. The core LoginRedirect
-        // element validates it the same way the password login does: falls back
-        // to LoginForm::REDIRECT_URL when empty or pointing at the logout
-        // action, and rejects external URLs.
-        $redirect = new LoginRedirect('redirect');
-        $redirect->setValue($login->redirect ?? null);
-
-        $this->redirectNow($redirect->getUrl());
+        $this->redirectNow($redirectUrl);
     }
 }

@@ -1,3 +1,14 @@
+icinga-sso-web (1:1.0.0+imatic7) icinga; urgency=medium
+
+  * Resolve the post-login redirect before authenticating rather than after.
+    A rejected target now costs no token exchange, and the refusal is rendered
+    for an anonymous user, which removes the need to set the user on the
+    request just so the error page could build AutoRefreshForm.
+  * Adopt the upstream reviewer's suggestions: chain setValue(), and read the
+    parameter with Url::fromRequest() as the core login form does.
+
+ -- Anima Artificialis <anima.artificialis@gmail.com>  Fri, 09 Oct 2026 08:03:44 +0000
+
 icinga-sso-web (1:1.0.0+imatic6) icinga; urgency=medium
 
   * Return a proper 400 for an external post-login redirect, as Icinga Web's
