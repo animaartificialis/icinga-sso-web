@@ -12,8 +12,10 @@ to clone and build the module yourself. Not affiliated with Icinga GmbH.
 
 **Fix:** after SSO sign-in the user is redirected to the originally requested URL
 (e.g. a deep link from a notification e-mail) instead of always landing on the
-dashboard. External URLs are rejected with a 400, via Icinga Web's own
-`LoginRedirect` element — the same validation the password login uses. Proposed upstream as
+dashboard. The redirect is validated by Icinga Web's own `LoginRedirect` element — the same
+validation the password login applies: empty or pointing at the logout action
+falls back to the dashboard, and an external URL is refused. (The password login
+surfaces that refusal as a form error; here it is a 400 page.) Proposed upstream as
 [PR #13](https://github.com/Icinga/icinga-sso-web/pull/13).
 
 ### Install the prebuilt `.deb`
